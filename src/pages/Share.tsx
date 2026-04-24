@@ -1,15 +1,49 @@
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { MapCanvas } from "../components/map/MapCanvas";
 import { discoverItineraries } from "../lib/mock-data";
 import { formatDuration } from "../lib/coords";
 import { useItineraryStore } from "../store/itinerary-store";
+import type { SavedItinerary } from "../types/itinerary";
+
+function buildShareText(itinerary: SavedItinerary) {
+  return [
+    `${itinerary.coverEmoji} ${itinerary.title}`,
+    [itinerary.areaLabel, itinerary.transportMode, `${itinerary.stops.length} stops`]
+      .filter(Boolean)
+      .join(" · "),
+    itinerary.description,
+    "",
+    ...itinerary.stops.map((stop, index) =>
+      `${index + 1}. ${stop.emoji} ${stop.name}${stop.arriveBy ? ` (${stop.arriveBy})` : ""}`,
+    ),
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
 
 export function SharePage() {
   const params = useParams();
+  const [shareLabel, setShareLabel] = useState("Copy summary");
+  const [jsonLabel, setJsonLabel] = useState("Copy JSON");
   const getItineraryById = useItineraryStore((state) => state.getItineraryById);
   const itinerary =
     (params.itineraryId ? getItineraryById(params.itineraryId) : undefined) ||
     discoverItineraries[0];
+  const shareText = useMemo(() => buildShareText(itinerary), [itinerary]);
+  const itineraryJson = useMemo(() => JSON.stringify(itinerary, null, 2), [itinerary]);
+
+  async function copySummary() {
+    await navigator.clipboard.writeText(shareText);
+    setShareLabel("Copied");
+    window.setTimeout(() => setShareLabel("Copy summary"), 1400);
+  }
+
+  async function copyJson() {
+    await navigator.clipboard.writeText(itineraryJson);
+    setJsonLabel("Copied");
+    window.setTimeout(() => setJsonLabel("Copy JSON"), 1400);
+  }
 
   return (
     <main className="container">
@@ -67,8 +101,11 @@ export function SharePage() {
             <Link className="button" to="/builder">
               Clone itinerary
             </Link>
-            <button type="button" className="ghost-button">
-              Copy share link
+            <button type="button" className="ghost-button" onClick={() => void copySummary()}>
+              {shareLabel}
+            </button>
+            <button type="button" className="ghost-button" onClick={() => void copyJson()}>
+              {jsonLabel}
             </button>
           </div>
         </section>

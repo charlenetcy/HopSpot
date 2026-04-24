@@ -442,6 +442,14 @@ select {
   padding-right: 0.2rem;
 }
 
+.area-results {
+  max-height: 14rem;
+}
+
+.area-result {
+  text-align: left;
+}
+
 .search-result,
 .stop-card,
 .stat-card,
@@ -459,6 +467,10 @@ select {
 
 .search-result {
   cursor: pointer;
+}
+
+.search-result:disabled {
+  transform: none;
 }
 
 .search-result:hover {

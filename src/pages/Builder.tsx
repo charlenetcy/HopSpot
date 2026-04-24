@@ -28,6 +28,7 @@ export function BuilderPage() {
   const moveStop = useItineraryStore((state) => state.moveStop);
   const setTransportMode = useItineraryStore((state) => state.setTransportMode);
   const saveItinerary = useItineraryStore((state) => state.saveItinerary);
+  const addedPlaceIds = useMemo(() => stops.map((stop) => stop.id), [stops]);
 
   useRouteSync();
 
@@ -72,6 +73,7 @@ export function BuilderPage() {
             onRegionChange={setRegion}
             onAddStop={handleAddStop}
             onResultsChange={setPreviewPlaces}
+            addedPlaceIds={addedPlaceIds}
           />
 
           <div className="section-heading">

@@ -2,6 +2,7 @@ import polyline from "@mapbox/polyline";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
 import { Crosshair, ZoomIn, ZoomOut } from "lucide-react";
+import { getAreaCenter } from "../../lib/areas";
 import { formatDistance, formatDuration } from "../../lib/coords";
 import type { GrabPlace, RouteLeg } from "../../types/grabmaps";
 import type { Stop } from "../../types/itinerary";
@@ -21,14 +22,6 @@ interface Point {
 }
 
 const DEFAULT_CENTER = { lat: 1.3521, lng: 103.8198 };
-const REGION_CENTERS: Record<string, Point> = {
-  orchard: { lat: 1.3048, lng: 103.8318 },
-  duxton: { lat: 1.2795, lng: 103.8438 },
-  "marina bay": { lat: 1.2834, lng: 103.8607 },
-  "tiong bahru": { lat: 1.2852, lng: 103.8263 },
-  sentosa: { lat: 1.2494, lng: 103.8303 },
-};
-
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
@@ -79,7 +72,7 @@ function getZoom(points: Point[]) {
 
 function getCenter(points: Point[], region: string) {
   if (points.length === 0) {
-    return REGION_CENTERS[region.toLowerCase()] || DEFAULT_CENTER;
+    return getAreaCenter(region) || DEFAULT_CENTER;
   }
 
   return {

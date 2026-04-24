@@ -1,4 +1,5 @@
 import { estimateRoute, searchMockPlaces } from "./mock-data";
+import { getAreaCenter } from "./areas";
 import type { GrabCategory, GrabPlace, RouteData } from "../types/grabmaps";
 import type { Stop, TransportMode } from "../types/itinerary";
 
@@ -41,12 +42,16 @@ export async function searchPlaces(
   }
 
   const params = new URLSearchParams();
+  const areaCenter = getAreaCenter(region || "");
   params.set(
     "keyword",
     [keyword, category].filter(Boolean).join(" ").trim(),
   );
   params.set("country", "SGP");
-  params.set("location", "1.3521,103.8198");
+  params.set(
+    "location",
+    areaCenter ? `${areaCenter.lat},${areaCenter.lng}` : "1.3521,103.8198",
+  );
   params.set("limit", "8");
 
   try {

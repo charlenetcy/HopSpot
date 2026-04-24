@@ -22,6 +22,14 @@ interface ItineraryState {
   getItineraryById: (id: string) => SavedItinerary | undefined;
 }
 
+function isSamePlace(left: Stop, right: Stop) {
+  return (
+    left.id === right.id ||
+    (left.name.trim().toLowerCase() === right.name.trim().toLowerCase() &&
+      left.address.trim().toLowerCase() === right.address.trim().toLowerCase())
+  );
+}
+
 function reorder<T>(items: T[], fromIndex: number, toIndex: number) {
   const copy = [...items];
   const [moved] = copy.splice(fromIndex, 1);
@@ -47,7 +55,9 @@ export const useItineraryStore = create<ItineraryState>((set, get) => ({
   savedItineraries: [],
   addStop: (stop) =>
     set((state) => ({
-      stops: [...state.stops, stop],
+      stops: state.stops.some((existing) => isSamePlace(existing, stop))
+        ? state.stops
+        : [...state.stops, stop],
     })),
   updateStop: (stopId, patch) =>
     set((state) => ({

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { usePlaceSearch } from "../../hooks/use-place-search";
+import { suggestAreas } from "../../lib/areas";
 import type { GrabCategory, GrabPlace } from "../../types/grabmaps";
 import type { Stop } from "../../types/itinerary";
 import { categoryEmoji } from "../../types/itinerary";
@@ -30,6 +31,7 @@ interface StopSearchProps {
   onRegionChange: (region: string) => void;
   onAddStop: (stop: Stop) => void;
   onResultsChange?: (results: GrabPlace[]) => void;
+  addedPlaceIds?: string[];
 }
 
 export function StopSearch({
@@ -37,10 +39,13 @@ export function StopSearch({
   onRegionChange,
   onAddStop,
   onResultsChange,
+  addedPlaceIds = [],
 }: StopSearchProps) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<GrabCategory | undefined>("cafe");
+  const [showAreaSuggestions, setShowAreaSuggestions] = useState(false);
   const { results, isLoading } = usePlaceSearch(query, category, region);
+  const areaSuggestions = useMemo(() => suggestAreas(region), [region]);
 
   const label = useMemo(() => {
     if (isLoading) {
@@ -65,7 +70,33 @@ export function StopSearch({
         placeholder="Area"
         value={region}
         onChange={(event) => onRegionChange(event.target.value)}
+        onFocus={() => setShowAreaSuggestions(true)}
+        onBlur={() => {
+          window.setTimeout(() => setShowAreaSuggestions(false), 120);
+        }}
       />
+
+      {showAreaSuggestions && areaSuggestions.length > 0 ? (
+        <div className="results-list area-results">
+          {areaSuggestions.map((area) => (
+            <button
+              key={area.name}
+              type="button"
+              className="search-result area-result"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                onRegionChange(area.name);
+                setShowAreaSuggestions(false);
+              }}
+            >
+              <div className="row-between">
+                <strong>{area.name}</strong>
+                <span className="pill">Area</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <div style={{ position: "relative" }}>
         <Search
@@ -96,12 +127,19 @@ export function StopSearch({
 
       <div className="muted">{label}</div>
       <div className="results-list">
-        {results.map((result) => (
+        {results.map((result) => {
+          const isAdded = addedPlaceIds.includes(result.id);
+          return (
           <button
             type="button"
             className="search-result"
             key={result.id}
             onClick={() => onAddStop(createStop(result))}
+            disabled={isAdded}
+            style={{
+              opacity: isAdded ? 0.64 : 1,
+              cursor: isAdded ? "default" : "pointer",
+            }}
           >
             <div className="row-between">
               <div>
@@ -111,11 +149,12 @@ export function StopSearch({
                 <div className="muted">{result.address}</div>
               </div>
               <span className="pill">
-                <Plus size={14} /> Add
+                <Plus size={14} /> {isAdded ? "Added" : "Add"}
               </span>
             </div>
           </button>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
