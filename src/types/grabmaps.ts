@@ -21,3 +21,8 @@ export interface RouteLeg {
   durationSeconds: number;
   distanceMeters: number;
 }
+
+export interface RouteData {
+  legs: RouteLeg[];
+  geometry?: string;
+}

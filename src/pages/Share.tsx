@@ -19,6 +19,7 @@ export function SharePage() {
           region={itinerary.areaLabel}
           stops={itinerary.stops}
           legs={itinerary.legs}
+          routeGeometry={itinerary.routeGeometry}
         />
         <section className="builder-panel">
           <div className="section-heading">

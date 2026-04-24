@@ -1,4 +1,4 @@
-import type { GrabPlace, RouteLeg } from "../types/grabmaps";
+import type { GrabPlace, RouteData, RouteLeg } from "../types/grabmaps";
 import type { SavedItinerary, Stop, WishlistItem } from "../types/itinerary";
 import { categoryEmoji } from "../types/itinerary";
 
@@ -94,7 +94,7 @@ export function searchMockPlaces(query: string, region?: string) {
   });
 }
 
-export function estimateRoute(stops: Stop[], mode: string): RouteLeg[] {
+export function estimateRoute(stops: Stop[], mode: string): RouteData {
   const baseByMode = {
     walking: 11,
     driving: 6,
@@ -102,10 +102,12 @@ export function estimateRoute(stops: Stop[], mode: string): RouteLeg[] {
   } as const;
   const multiplier = baseByMode[mode as keyof typeof baseByMode] ?? 10;
 
-  return stops.slice(1).map((_, index) => ({
-    durationSeconds: (multiplier + index * 4) * 60,
-    distanceMeters: 900 + index * 550,
-  }));
+  return {
+    legs: stops.slice(1).map((_, index) => ({
+      durationSeconds: (multiplier + index * 4) * 60,
+      distanceMeters: 900 + index * 550,
+    })),
+  };
 }
 
 export const discoverItineraries: SavedItinerary[] = [

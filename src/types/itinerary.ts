@@ -25,6 +25,7 @@ export interface SavedItinerary extends ItineraryMeta {
   transportMode: TransportMode;
   stops: Stop[];
   legs: RouteLeg[];
+  routeGeometry?: string;
   createdAt: string;
   isKOL?: boolean;
 }

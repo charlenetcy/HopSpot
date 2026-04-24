@@ -1,5 +1,5 @@
 import { estimateRoute, searchMockPlaces } from "./mock-data";
-import type { GrabCategory, GrabPlace, RouteLeg } from "../types/grabmaps";
+import type { GrabCategory, GrabPlace, RouteData } from "../types/grabmaps";
 import type { Stop, TransportMode } from "../types/itinerary";
 
 const proxyBase = import.meta.env.VITE_GRABMAPS_PROXY_URL?.trim() || "";
@@ -82,7 +82,7 @@ export async function searchPlaces(
 export async function calculateRoute(
   stops: Stop[],
   mode: TransportMode,
-): Promise<RouteLeg[]> {
+): Promise<RouteData> {
   if (stops.length <= 1 || !proxyBase) {
     return estimateRoute(stops, mode);
   }
@@ -96,14 +96,20 @@ export async function calculateRoute(
   try {
     const data = await proxyGet<{
       routes?: Array<{
+        geometry?: string;
         legs?: Array<{ duration?: number; distance?: number }>;
       }>;
     }>("/api/v1/maps/eta/v1/direction", params);
 
-    return (data.routes?.[0]?.legs ?? []).map((leg) => ({
-      durationSeconds: Math.round(leg.duration ?? 0),
-      distanceMeters: Math.round(leg.distance ?? 0),
-    }));
+    const route = data.routes?.[0];
+
+    return {
+      geometry: route?.geometry,
+      legs: (route?.legs ?? []).map((leg) => ({
+        durationSeconds: Math.round(leg.duration ?? 0),
+        distanceMeters: Math.round(leg.distance ?? 0),
+      })),
+    };
   } catch (error) {
     console.warn("Falling back to mock route estimation:", error);
     return estimateRoute(stops, mode);

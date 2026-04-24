@@ -7,6 +7,7 @@ import type { ItineraryMeta, SavedItinerary, Stop, TransportMode } from "../type
 interface ItineraryState {
   stops: Stop[];
   legs: RouteLeg[];
+  routeGeometry?: string;
   transportMode: TransportMode;
   isCalculatingRoute: boolean;
   savedMeta: ItineraryMeta;
@@ -39,6 +40,7 @@ export const defaultMeta: ItineraryMeta = {
 export const useItineraryStore = create<ItineraryState>((set, get) => ({
   stops: [],
   legs: [],
+  routeGeometry: undefined,
   transportMode: "walking",
   isCalculatingRoute: false,
   savedMeta: defaultMeta,
@@ -65,8 +67,12 @@ export const useItineraryStore = create<ItineraryState>((set, get) => ({
   recalculateRoute: async () => {
     const { stops, transportMode } = get();
     set({ isCalculatingRoute: true });
-    const legs = await calculateRoute(stops, transportMode);
-    set({ legs, isCalculatingRoute: false });
+    const route = await calculateRoute(stops, transportMode);
+    set({
+      legs: route.legs,
+      routeGeometry: route.geometry,
+      isCalculatingRoute: false,
+    });
   },
   saveItinerary: (meta) => {
     set({ savedMeta: meta });
@@ -79,6 +85,7 @@ export const useItineraryStore = create<ItineraryState>((set, get) => ({
       transportMode: state.transportMode,
       stops: state.stops,
       legs: state.legs,
+      routeGeometry: state.routeGeometry,
       ...meta,
     };
     set((current) => ({

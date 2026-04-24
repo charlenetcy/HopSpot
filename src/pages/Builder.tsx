@@ -20,6 +20,7 @@ export function BuilderPage() {
 
   const stops = useItineraryStore((state) => state.stops);
   const legs = useItineraryStore((state) => state.legs);
+  const routeGeometry = useItineraryStore((state) => state.routeGeometry);
   const transportMode = useItineraryStore((state) => state.transportMode);
   const addStop = useItineraryStore((state) => state.addStop);
   const updateStop = useItineraryStore((state) => state.updateStop);
@@ -51,6 +52,7 @@ export function BuilderPage() {
           region={region}
           stops={stops}
           legs={legs}
+          routeGeometry={routeGeometry}
           previewPlaces={previewPlaces}
         />
 
